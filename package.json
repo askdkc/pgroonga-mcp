@@ -1,0 +1,73 @@
+{
+  "name": "pgroonga-mcp",
+  "version": "0.1.0",
+  "description": "Read-only, PGroonga-aware MCP server for PostgreSQL search and diagnostics",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "postgresql",
+    "pgroonga",
+    "groonga",
+    "full-text-search"
+  ],
+  "homepage": "https://github.com/askdkc/pgroonga-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/askdkc/pgroonga-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/askdkc/pgroonga-mcp.git"
+  },
+  "license": "MIT",
+  "author": "askdkc",
+  "type": "module",
+  "bin": {
+    "pgroonga-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "examples/itaiji",
+    ".env.example",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run verify"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "pg": "8.16.3",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.32.0",
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@types/node": "24.3.0",
+    "@types/pg": "8.15.5",
+    "@typescript-eslint/eslint-plugin": "8.39.0",
+    "@typescript-eslint/parser": "8.39.0",
+    "eslint": "9.32.0",
+    "prettier": "3.6.2",
+    "tsx": "4.20.3",
+    "typescript": "5.9.2",
+    "typescript-eslint": "8.39.0",
+    "vitest": "3.2.7"
+  }
+}
