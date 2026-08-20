@@ -18,13 +18,13 @@ The npm package supplies the MCP server only. It does not install PostgreSQL or 
 For a one-off or MCP-host installation, pin the package version you have tested:
 
 ```sh
-npx --yes pgroonga-mcp@0.1.0
+npx --yes @askdkc/pgroonga-mcp@0.1.0
 ```
 
 For a global installation:
 
 ```sh
-npm install --global pgroonga-mcp@0.1.0
+npm install --global @askdkc/pgroonga-mcp@0.1.0
 pgroonga-mcp
 ```
 
@@ -39,7 +39,7 @@ The exact configuration file depends on the MCP host. A generic stdio configurat
   "mcpServers": {
     "pgroonga": {
       "command": "npx",
-      "args": ["--yes", "pgroonga-mcp@0.1.0"],
+      "args": ["--yes", "@askdkc/pgroonga-mcp@0.1.0"],
       "env": {
         "PGROONGA_DATABASE_URL": "postgresql://pgroonga_mcp@127.0.0.1:5432/app",
         "PGROONGA_ALLOWED_SCHEMAS": "public",
@@ -50,7 +50,7 @@ The exact configuration file depends on the MCP host. A generic stdio configurat
 }
 ```
 
-Use the installed `pgroonga-mcp` command instead of `npx` when the package is installed globally. Do not put database passwords in a committed configuration file; use the MCP host's environment/secret facility. The server does not load `.env` files automatically.
+The npm package name is `@askdkc/pgroonga-mcp`, while the installed executable remains `pgroonga-mcp`. Use that executable instead of `npx` when the package is installed globally. Do not put database passwords in a committed configuration file; use the MCP host's environment/secret facility. The server does not load `.env` files automatically.
 
 ## Database grants
 
