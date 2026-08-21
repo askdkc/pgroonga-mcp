@@ -1,5 +1,7 @@
 # pgroonga-mcp
 
+[日本語版 README](README.ja.md)
+
 Read-only PostgreSQL search and diagnostics over the [Model Context Protocol](https://modelcontextprotocol.io/). The server discovers the installed PGroonga schema and capabilities, resolves search targets from PostgreSQL catalogs, and binds query/filter values as parameters.
 
 It does not expose arbitrary SQL, `pgroonga_command`, DDL, dictionary mutation, or repair operations.
@@ -11,7 +13,7 @@ It does not expose arbitrary SQL, `pgroonga_command`, DDL, dictionary mutation, 
 - A dedicated PostgreSQL role that is neither a superuser nor `BYPASSRLS`.
 - An MCP host that supports local stdio servers.
 
-The npm package supplies the MCP server only. It does not install PostgreSQL or PGroonga.
+The npm package supplies the MCP server and a project setup command. It does not install PostgreSQL or PGroonga.
 
 ## Install
 
@@ -33,6 +35,60 @@ pgroonga-mcp
 ```
 
 The server communicates over stdin/stdout. Logs go to stderr so they do not corrupt the MCP protocol stream.
+
+## Project setup
+
+After installing the package in a project, run the setup command to register a project-local
+`pgroonga` MCP server for the clients you use:
+
+```sh
+npm i @askdkc/pgroonga-mcp
+npx pgroonga-mcp setup
+```
+
+The interactive setup lets you select Codex, Claude Code, OpenCode, and DSH (DeepSeek Harness).
+It writes only project files and does not modify user-global configuration or add database
+credentials. The generated server command uses the installed package without downloading at MCP
+startup:
+
+```text
+npx --no-install pgroonga-mcp
+```
+
+Use flags when setup must be scripted:
+
+```sh
+# Configure every supported client.
+npx pgroonga-mcp setup --all
+
+# Configure selected clients.
+npx pgroonga-mcp setup --clients codex,claude,opencode
+
+# Preview changes without writing files.
+npx pgroonga-mcp setup --all --dry-run
+
+# Replace an existing pgroonga entry after reviewing the diff.
+npx pgroonga-mcp setup --clients claude --force
+```
+
+The setup command creates or updates these project-scoped files:
+
+| Client      | File                                            |
+| ----------- | ----------------------------------------------- |
+| Codex       | `.codex/config.toml`                            |
+| Claude Code | `.mcp.json`                                     |
+| OpenCode    | `opencode.json` or an existing `opencode.jsonc` |
+| DSH         | `cordis.yml`                                    |
+
+Unrelated settings are preserved. If a selected file already contains a different `pgroonga`
+entry, setup stops instead of overwriting it; use `--force` only after reviewing the existing
+configuration. OpenCode JSONC comments may be normalized when an existing `opencode.jsonc` is
+updated. Restart each selected client after setup. Claude Code may also ask you to approve the
+project-scoped `.mcp.json` server.
+
+The command is platform-neutral and uses Node.js filesystem APIs and project-relative paths. It
+works on macOS, Linux, and Linux environments running under Windows WSL. In WSL, run it with the
+Node.js and npm installation inside WSL and from the project directory visible to WSL.
 
 ## MCP host configuration
 

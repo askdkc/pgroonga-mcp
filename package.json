@@ -29,6 +29,7 @@
     "examples/itaiji",
     ".env.example",
     "README.md",
+    "README.ja.md",
     "LICENSE"
   ],
   "engines": {
@@ -70,5 +71,10 @@
     "typescript": "5.9.2",
     "typescript-eslint": "8.39.0",
     "vitest": "3.2.7"
+  },
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
   }
 }
