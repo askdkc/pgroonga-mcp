@@ -90,6 +90,10 @@ The command is platform-neutral and uses Node.js filesystem APIs and project-rel
 works on macOS, Linux, and Linux environments running under Windows WSL. In WSL, run it with the
 Node.js and npm installation inside WSL and from the project directory visible to WSL.
 
+## Sample
+
+See [pgroonga-mcp-sample](https://github.com/askdkc/pgroonga-mcp-sample) for an example of using PGroonga MCP.
+
 ## MCP host configuration
 
 The exact configuration file depends on the MCP host. A generic stdio configuration looks like this:

@@ -80,6 +80,10 @@ npx pgroonga-mcp setup --clients claude --force
 
 セットアップコマンドはNode.jsのファイルシステムAPIとプロジェクト相対パスだけを使用します。macOS、Linux、Windows上のWSLで利用できます。WSLではWSL内にインストールしたNode.js/npmを使い、WSLから参照できるプロジェクトディレクトリで実行してください。
 
+## サンプル
+
+[pgroonga-mcp-sample](https://github.com/askdkc/pgroonga-mcp-sample) にPGroonga MCPの利用サンプルがあります。
+
 ## MCPホストの手動設定
 
 MCPホストごとに設定ファイルの形式が異なります。一般的なstdio設定は次のとおりです。
