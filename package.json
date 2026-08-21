@@ -1,6 +1,6 @@
 {
   "name": "@askdkc/pgroonga-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read-only, PGroonga-aware MCP server for PostgreSQL search and diagnostics",
   "keywords": [
     "mcp",
