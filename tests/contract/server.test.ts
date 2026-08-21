@@ -7,7 +7,7 @@ import { createLogger } from "../../src/logging.js";
 import { createServer } from "../../src/server.js";
 
 const config: Config = {
-  databaseUrl: "postgresql://localhost/db",
+  databaseUrl: undefined,
   allowedSchemas: ["public"],
   allowedTables: [],
   statementTimeoutMs: 5000,
@@ -54,6 +54,31 @@ describe("MCP contract", () => {
       "pgroonga_search",
       "pgroonga_server_info",
       "pgroonga_validate_normalization_profile",
+    ]);
+  });
+
+  it("defers database configuration errors until a database tool is called", async () => {
+    const { server, database } = createServer(config, createLogger("error"));
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "contract-test", version: "0.1.0" });
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+    close = async () => {
+      await client.close();
+      await server.close();
+      await database.close();
+    };
+
+    const result = await client.callTool({
+      name: "pgroonga_server_info",
+      arguments: {},
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content).toEqual([
+      {
+        type: "text",
+        text: expect.stringContaining('"code":"database_unavailable"'),
+      },
     ]);
   });
 });

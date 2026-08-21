@@ -1,13 +1,24 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+import dotenv from "dotenv";
 import { z } from "zod/v4";
 
 import { AppError } from "./errors.js";
 
 const logLevels = ["debug", "info", "warn", "error"] as const;
+const databaseEnvNames = [
+  "PGROONGA_DATABASE_URL",
+  "DATABASE_URL",
+  "POSTGRES_URL",
+  "POSTGRESQL_URL",
+] as const;
+const fallbackDatabaseEnvNames = ["DATABASE_URL", "POSTGRES_URL", "POSTGRESQL_URL"] as const;
 
 export type LogLevel = (typeof logLevels)[number];
 
 export interface Config {
-  databaseUrl: string;
+  databaseUrl: string | undefined;
   allowedSchemas: string[];
   allowedTables: string[];
   statementTimeoutMs: number;
@@ -50,12 +61,56 @@ function rejectNul(values: string[], name: string): void {
   }
 }
 
-export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
-  const databaseUrl = env.PGROONGA_DATABASE_URL?.trim();
-  if (!databaseUrl) {
-    throw new AppError("invalid_configuration", "PGROONGA_DATABASE_URL is required");
+function isMissingFile(error: unknown): boolean {
+  return (
+    error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT"
+  );
+}
+
+export function loadProjectEnv(env: NodeJS.ProcessEnv = process.env): void {
+  const configuredPath = env.PGROONGA_ENV_FILE?.trim();
+  const envFilePath = configuredPath || ".env";
+  let content: string;
+  try {
+    content = readFileSync(resolve(envFilePath), "utf8");
+  } catch (error) {
+    if (isMissingFile(error)) return;
+    throw new AppError(
+      "invalid_configuration",
+      `Unable to load environment file ${envFilePath}: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
-  if (databaseUrl.includes("\0")) {
+
+  const hasExplicitDatabaseEnv = databaseEnvNames.some((name) => env[name]?.trim());
+  for (const [key, value] of Object.entries(dotenv.parse(content))) {
+    if (hasExplicitDatabaseEnv && (databaseEnvNames as readonly string[]).includes(key)) continue;
+    if (env[key] === undefined) env[key] = value;
+  }
+}
+
+function isPostgresUrl(value: string): boolean {
+  try {
+    const protocol = new URL(value).protocol;
+    return protocol === "postgres:" || protocol === "postgresql:";
+  } catch {
+    return false;
+  }
+}
+
+function databaseUrlFromEnv(env: NodeJS.ProcessEnv): string | undefined {
+  const explicitUrl = env.PGROONGA_DATABASE_URL?.trim();
+  if (explicitUrl) return explicitUrl;
+
+  for (const name of fallbackDatabaseEnvNames) {
+    const value = env[name]?.trim();
+    if (value && isPostgresUrl(value)) return value;
+  }
+  return undefined;
+}
+
+export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
+  const databaseUrl = databaseUrlFromEnv(env);
+  if (databaseUrl?.includes("\0")) {
     throw new AppError("invalid_configuration", "PGROONGA_DATABASE_URL must not contain NUL bytes");
   }
 

@@ -21,6 +21,10 @@ For a one-off or MCP-host installation, pin the package version you have tested:
 npx --yes @askdkc/pgroonga-mcp@0.1.0
 ```
 
+The server can start without a database URL, so an MCP host or AI agent can use it for
+tool discovery and SQL-generation workflows. Database-backed tools return a structured
+`database_unavailable` error until a PostgreSQL URL is configured.
+
 For a global installation:
 
 ```sh
@@ -50,7 +54,7 @@ The exact configuration file depends on the MCP host. A generic stdio configurat
 }
 ```
 
-The npm package name is `@askdkc/pgroonga-mcp`, while the installed executable remains `pgroonga-mcp`. Use that executable instead of `npx` when the package is installed globally. Do not put database passwords in a committed configuration file; use the MCP host's environment/secret facility. The server does not load `.env` files automatically.
+The npm package name is `@askdkc/pgroonga-mcp`, while the installed executable remains `pgroonga-mcp`. Use that executable instead of `npx` when the package is installed globally. Do not put database passwords in a committed configuration file; use the MCP host's environment/secret facility. The server loads `.env` from its current working directory when present, without overriding existing process environment variables. Set `PGROONGA_ENV_FILE` when the project env file is elsewhere.
 
 ## Database grants
 
@@ -67,23 +71,24 @@ Grant `SELECT` on any NormalizerTable dictionary tables used by the configured i
 
 ## Configuration
 
-All settings are environment variables. `PGROONGA_DATABASE_URL` is required. The default allowlist is the `public` schema; an empty `PGROONGA_ALLOWED_TABLES` allows all tables in the allowed schemas, so set it explicitly in production. Tables may be written as `schema.table` or as a table name.
+All settings are environment variables. `PGROONGA_DATABASE_URL` is optional. If it is absent, a PostgreSQL URL in `DATABASE_URL`, `POSTGRES_URL`, or `POSTGRESQL_URL` is used when available. Non-PostgreSQL values are ignored. The default allowlist is the `public` schema; an empty `PGROONGA_ALLOWED_TABLES` allows all tables in the allowed schemas, so set it explicitly in production. Tables may be written as `schema.table` or as a table name.
 
-| Variable                                 |   Default | Description                          |
-| ---------------------------------------- | --------: | ------------------------------------ |
-| `PGROONGA_DATABASE_URL`                  |         — | PostgreSQL connection URL (required) |
-| `PGROONGA_ALLOWED_SCHEMAS`               |  `public` | Comma-separated schema allowlist     |
-| `PGROONGA_ALLOWED_TABLES`                |     empty | Comma-separated table allowlist      |
-| `PGROONGA_STATEMENT_TIMEOUT_MS`          |    `5000` | PostgreSQL statement timeout         |
-| `PGROONGA_LOCK_TIMEOUT_MS`               |    `1000` | PostgreSQL lock timeout              |
-| `PGROONGA_DEFAULT_LIMIT`                 |      `20` | Default search row limit             |
-| `PGROONGA_MAX_ROWS`                      |     `100` | Maximum search row limit             |
-| `PGROONGA_MAX_RESPONSE_BYTES`            | `1048576` | Serialized response limit            |
-| `PGROONGA_MAX_TEXT_BYTES`                |  `131072` | Per-string result limit              |
-| `PGROONGA_MAX_NORMALIZATION_INPUT_BYTES` |   `16384` | Normalization input limit            |
-| `PGROONGA_MAX_VARIANTS`                  |     `500` | Variant lookup limit                 |
-| `PGROONGA_LOG_LEVEL`                     |    `info` | `debug`, `info`, `warn`, or `error`  |
-| `PGROONGA_TRANSPORT`                     |   `stdio` | Only `stdio` is currently supported  |
+| Variable                                 |   Default | Description                         |
+| ---------------------------------------- | --------: | ----------------------------------- |
+| `PGROONGA_DATABASE_URL`                  |         — | Optional PostgreSQL connection URL  |
+| `PGROONGA_ENV_FILE`                      |    `.env` | Project env file to load            |
+| `PGROONGA_ALLOWED_SCHEMAS`               |  `public` | Comma-separated schema allowlist    |
+| `PGROONGA_ALLOWED_TABLES`                |     empty | Comma-separated table allowlist     |
+| `PGROONGA_STATEMENT_TIMEOUT_MS`          |    `5000` | PostgreSQL statement timeout        |
+| `PGROONGA_LOCK_TIMEOUT_MS`               |    `1000` | PostgreSQL lock timeout             |
+| `PGROONGA_DEFAULT_LIMIT`                 |      `20` | Default search row limit            |
+| `PGROONGA_MAX_ROWS`                      |     `100` | Maximum search row limit            |
+| `PGROONGA_MAX_RESPONSE_BYTES`            | `1048576` | Serialized response limit           |
+| `PGROONGA_MAX_TEXT_BYTES`                |  `131072` | Per-string result limit             |
+| `PGROONGA_MAX_NORMALIZATION_INPUT_BYTES` |   `16384` | Normalization input limit           |
+| `PGROONGA_MAX_VARIANTS`                  |     `500` | Variant lookup limit                |
+| `PGROONGA_LOG_LEVEL`                     |    `info` | `debug`, `info`, `warn`, or `error` |
+| `PGROONGA_TRANSPORT`                     |   `stdio` | Only `stdio` is currently supported |
 
 A complete development example is in [.env.example](.env.example). The environment example and the compact NormalizerTable fixture under `examples/itaiji/` are included in the npm tarball.
 

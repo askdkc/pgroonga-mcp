@@ -2,13 +2,14 @@
 
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 
-import { loadConfig } from "./config.js";
+import { loadConfig, loadProjectEnv } from "./config.js";
 import { CatalogService } from "./db/catalog.js";
 import { Database } from "./db/pool.js";
 import { createLogger } from "./logging.js";
 import { NormalizationService } from "./normalization/service.js";
 import { createServer } from "./server.js";
 
+loadProjectEnv();
 const config = loadConfig();
 const logger = createLogger(config.logLevel);
 const database = new Database(config, logger);

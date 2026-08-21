@@ -1,18 +1,23 @@
 import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
 
 import type { Config } from "../config.js";
-import { errorMessage } from "../errors.js";
+import { AppError, errorMessage } from "../errors.js";
 import type { Logger } from "../logging.js";
 
 export type DbClient = Pick<PoolClient, "query">;
 
 export class Database {
-  private readonly pool: Pool;
+  private readonly pool: Pool | undefined;
 
   public constructor(
     private readonly config: Config,
     private readonly logger: Logger,
   ) {
+    if (!config.databaseUrl) {
+      this.pool = undefined;
+      return;
+    }
+
     this.pool = new Pool({
       connectionString: config.databaseUrl,
       max: 5,
@@ -26,8 +31,18 @@ export class Database {
     );
   }
 
+  private requirePool(): Pool {
+    if (!this.pool) {
+      throw new AppError(
+        "database_unavailable",
+        "A PostgreSQL connection URL is not configured. Set PGROONGA_DATABASE_URL or provide a PostgreSQL DATABASE_URL in .env.",
+      );
+    }
+    return this.pool;
+  }
+
   public async withReadOnly<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
-    const client = await this.pool.connect();
+    const client = await this.requirePool().connect();
     try {
       await client.query("BEGIN READ ONLY");
       await client.query("SET LOCAL row_security = on");
@@ -52,10 +67,10 @@ export class Database {
     text: string,
     values?: unknown[],
   ): Promise<QueryResult<T>> {
-    return this.pool.query<T>(text, values);
+    return this.requirePool().query<T>(text, values);
   }
 
   public async close(): Promise<void> {
-    await this.pool.end();
+    await this.pool?.end();
   }
 }
