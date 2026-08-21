@@ -6,7 +6,7 @@ It does not expose arbitrary SQL, `pgroonga_command`, DDL, dictionary mutation, 
 
 ## Requirements
 
-- Node.js 20 or newer.
+- Node.js 22 or newer.
 - PostgreSQL with the PGroonga extension installed.
 - A dedicated PostgreSQL role that is neither a superuser nor `BYPASSRLS`.
 - An MCP host that supports local stdio servers.
@@ -15,10 +15,10 @@ The npm package supplies the MCP server only. It does not install PostgreSQL or 
 
 ## Install
 
-For a one-off or MCP-host installation, pin the package version you have tested:
+For a project installation:
 
 ```sh
-npx --yes @askdkc/pgroonga-mcp@0.1.0
+npm i @askdkc/pgroonga-mcp
 ```
 
 The server can start without a database URL, so an MCP host or AI agent can use it for
@@ -28,7 +28,7 @@ tool discovery and SQL-generation workflows. Database-backed tools return a stru
 For a global installation:
 
 ```sh
-npm install --global @askdkc/pgroonga-mcp@0.1.0
+npm i --global @askdkc/pgroonga-mcp
 pgroonga-mcp
 ```
 
@@ -43,7 +43,7 @@ The exact configuration file depends on the MCP host. A generic stdio configurat
   "mcpServers": {
     "pgroonga": {
       "command": "npx",
-      "args": ["--yes", "@askdkc/pgroonga-mcp@0.1.0"],
+      "args": ["--yes", "@askdkc/pgroonga-mcp"],
       "env": {
         "PGROONGA_DATABASE_URL": "postgresql://pgroonga_mcp@127.0.0.1:5432/app",
         "PGROONGA_ALLOWED_SCHEMAS": "public",
